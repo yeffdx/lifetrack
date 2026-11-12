@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Análisis · LifeTrack{% endblock %}
+
+{% block content %}
+  <!-- Encabezado de página -->
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Datos registrados</p>
+      <h1>Análisis</h1>
+      <p class="text-muted mb-0">
+        Pandas y NumPy transforman la información almacenada; los gráficos no incluyen datos simulados.
+      </p>
+    </div>
+  </section>
+
+  <!-- Cuadrícula de gráficos -->
+  <section class="row g-4">
+    <!-- Finalización de tareas por día -->
+    <div class="col-lg-6">
+      <article class="surface">
+        <h2>Finalización de tareas por día</h2>
+        {% if analysis.task_completion %}
+          {{ charts.tasks|safe }}
+        {% else %}
+          <div class="empty-state compact">No existen finalizaciones registradas todavía.</div>
+        {% endif %}
+      </article>
+    </div>
+
+    <!-- Días con mayor actividad -->
+    <div class="col-lg-6">
+      <article class="surface">
+        <h2>Días con mayor actividad</h2>
+        {% if analysis.activity %}
+          {{ charts.activity|safe }}
+        {% else %}
+          <div class="empty-state compact">Aparecerá al completar tareas.</div>
+        {% endif %}
+      </article>
+    </div>
+
+    <!-- Tendencia semanal -->
+    <div class="col-lg-6">
+      <article class="surface">
+        <h2>Tendencia semanal</h2>
+        {% if analysis.weekly_completion %}
+          {{ charts.weekly|safe }}
+        {% else %}
+          <div class="empty-state compact">Se mostrará con finalizaciones registradas.</div>
+        {% endif %}
+      </article>
+    </div>
+
+    <!-- Tendencia mensual -->
+    <div class="col-lg-6">
+      <article class="surface">
+        <h2>Tendencia mensual</h2>
+        {% if analysis.monthly_completion %}
+          {{ charts.monthly|safe }}
+        {% else %}
+          <div class="empty-state compact">Se mostrará con finalizaciones registradas.</div>
+        {% endif %}
+      </article>
+    </div>
+
+    <!-- Consistencia de hábitos -->
+    <div class="col-lg-6">
+      <article class="surface">
+        <h2>Consistencia de hábitos</h2>
+        {% if analysis.habits %}
+          {{ charts.habits|safe }}
+        {% else %}
+          <div class="empty-state compact">Crea un hábito para calcular su cumplimiento.</div>
+        {% endif %}
+      </article>
+    </div>
+
+    <!-- Evolución de objetivos -->
+    <div class="col-lg-6">
+      <article class="surface">
+        <h2>Evolución de objetivos</h2>
+        {% if analysis.goals %}
+          {{ charts.goals|safe }}
+        {% else %}
+          <div class="empty-state compact">No hay objetivos cuantificables registrados.</div>
+        {% endif %}
+      </article>
+    </div>
+  </section>
+
+  <!-- Comparación semanal -->
+  {% if analysis.period_comparison %}
+    <section class="surface mt-4">
+      <h2>Comparación semanal</h2>
+      <p class="mb-0">
+        Última semana: <strong>{{ analysis.period_comparison.latest }}</strong> tareas finalizadas;
+        semana anterior: <strong>{{ analysis.period_comparison.previous }}</strong>.
+        Diferencia: <strong>{{ '%+d'|format(analysis.period_comparison.difference) }}</strong>.
+      </p>
+    </section>
+  {% endif %}
+
+  <!-- Recomendaciones explicables -->
+  <section class="surface mt-4">
+    <h2>Recomendaciones explicables</h2>
+    {% if analysis.recommendations %}
+      <ul class="recommendations">
+        {% for recommendation in analysis.recommendations %}
+          <li>{{ recommendation }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted mb-0">
+        Aún no hay suficiente evidencia para una recomendación. Se requieren registros comparables;
+        la aplicación no infiere causas ni predice comportamiento.
+      </p>
+    {% endif %}
+  </section>
+{% endblock %}

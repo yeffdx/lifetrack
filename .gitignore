@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+lifetrack.sqlite3
+.env
+AGENTS.md

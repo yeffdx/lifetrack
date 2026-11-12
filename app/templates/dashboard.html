@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Resumen · LifeTrack{% endblock %}
+
+{% block content %}
+  <!-- Encabezado de página -->
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Organización personal</p>
+      <h1>Tu progreso, con contexto</h1>
+      <p class="text-muted mb-0">
+        Los indicadores se calculan solo con los registros que has creado.
+      </p>
+    </div>
+
+    <a class="btn btn-primary" href="{{ url_for('tasks.index') }}">
+      Gestionar tareas
+    </a>
+  </section>
+
+  <!-- Cuadrícula de métricas principales -->
+  <section class="metric-grid" aria-label="Indicadores principales">
+    <article>
+      <p>Tareas pendientes</p>
+      <strong>{{ metrics.pending_tasks }}</strong>
+      <small>{{ metrics.completed_tasks }} completadas</small>
+    </article>
+
+    <article>
+      <p>Cumplimiento de tareas</p>
+      <strong>
+        {% if metrics.task_completion is none %}
+          —
+        {% else %}
+          {{ metrics.task_completion }}%
+        {% endif %}
+      </strong>
+      <small>sobre todas las tareas registradas</small>
+    </article>
+
+    <article>
+      <p>Hábitos activos</p>
+      <strong>{{ metrics.active_habits }}</strong>
+      <small>
+        {% if metrics.habit_completion is none %}
+          sin registros aún
+        {% else %}
+          {{ metrics.habit_completion }}% de cumplimiento
+        {% endif %}
+      </small>
+    </article>
+
+    <article>
+      <p>Objetivos en progreso</p>
+      <strong>{{ metrics.active_goals }}</strong>
+      <small>con medición cuantificable</small>
+    </article>
+  </section>
+
+  <!-- Listados de actividad reciente y hábitos -->
+  <section class="row g-4 mt-1">
+    <!-- Columna izquierda: Actividad reciente -->
+    <div class="col-lg-7">
+      <div class="surface">
+        <div class="section-heading">
+          <h2>Actividad reciente</h2>
+          <a href="{{ url_for('tasks.index') }}">Ver tareas</a>
+        </div>
+
+        {% if recent_tasks %}
+          <div class="list-group list-group-flush">
+            {% for task in recent_tasks %}
+              <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ task.title }}</strong>
+                  {% if task.due_date %}
+                    <small class="d-block text-muted">Vence: {{ task.due_date }}</small>
+                  {% endif %}
+                </div>
+
+                <span class="status {{ task.status }}">
+                  {{ 'Completada' if task.status == 'completed' else 'Pendiente' }}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <p>Aún no hay tareas.</p>
+            <a href="{{ url_for('tasks.index') }}">Crea la primera tarea</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Columna derecha: Hábitos -->
+    <div class="col-lg-5">
+      <div class="surface">
+        <div class="section-heading">
+          <h2>Hábitos</h2>
+          <a href="{{ url_for('habits.index') }}">Ver hábitos</a>
+        </div>
+
+        {% if habits %}
+          <ul class="plain-list">
+            {% for habit in habits if habit.active %}
+              <li>
+                {{ habit.name }}
+                <span>{{ 'diario' if habit.frequency == 'daily' else 'días elegidos' }}</span>
+              </li>
+            {% else %}
+              <li class="text-muted">No hay hábitos activos.</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-state">
+            <p>Registra un hábito para medir su constancia.</p>
+            <a href="{{ url_for('habits.index') }}">Crear hábito</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+{% endblock %}

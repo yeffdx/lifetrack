@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurar hábito · LifeTrack{% endblock %}
+
+{% block content %}
+  <section class="narrow">
+    <!-- Encabezado de página -->
+    <p class="eyebrow">Hábitos</p>
+    <h1>Configurar hábito</h1>
+
+    <!-- Formulario de edición -->
+    <form method="post" class="surface mt-4">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+      <!-- Nombre del hábito -->
+      <label class="form-label" for="name">Nombre</label>
+      <input
+        class="form-control mb-3"
+        id="name"
+        name="name"
+        value="{{ habit.name }}"
+        maxlength="120"
+        required
+      >
+
+      <!-- Frecuencia y fecha de inicio -->
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="frequency">Frecuencia</label>
+          <select class="form-select" id="frequency" name="frequency">
+            <option value="daily" {{ 'selected' if habit.frequency == 'daily' }}>
+              Todos los días
+            </option>
+            <option value="weekdays" {{ 'selected' if habit.frequency == 'weekdays' }}>
+              Días seleccionados
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="start_date">Inicio</label>
+          <input
+            class="form-control"
+            id="start_date"
+            type="date"
+            name="start_date"
+            value="{{ habit.start_date }}"
+          >
+        </div>
+      </div>
+
+      <!-- Selector de días de la semana -->
+      <fieldset class="weekday-picker mt-3">
+        <legend class="form-label">Días seleccionados</legend>
+        {% set selected_days = habit.weekdays.split(',') %}
+
+        {% for value, label in [('0','L'), ('1','M'), ('2','X'), ('3','J'), ('4','V'), ('5','S'), ('6','D')] %}
+          <label>
+            <input
+              type="checkbox"
+              name="weekdays"
+              value="{{ value }}"
+              {{ 'checked' if value in selected_days }}
+            >
+            {{ label }}
+          </label>
+        {% endfor %}
+      </fieldset>
+
+      <!-- Estado del hábito -->
+      <label class="form-check mt-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="active"
+          {{ 'checked' if habit.active }}
+        >
+        <span class="form-check-label">Hábito activo</span>
+      </label>
+
+      <!-- Botones de acción -->
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-primary">Guardar cambios</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('habits.index') }}">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

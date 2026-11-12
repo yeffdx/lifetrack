@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendario · LifeTrack{% endblock %}
+
+{% block content %}
+  <!-- Encabezado de página -->
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Vista temporal</p>
+      <h1>Calendario</h1>
+      <p class="text-muted mb-0">Vencimientos, hábitos programados y fechas objetivo.</p>
+    </div>
+  </section>
+
+  <!-- Contenedor principal del calendario -->
+  <section class="surface p-3 p-md-4">
+    <!-- Navegación entre meses -->
+    <div class="calendar-nav">
+      <a
+        class="btn btn-sm btn-outline-secondary"
+        href="{{ url_for('main.calendar_view', year=previous.year, month=previous.month) }}"
+      >
+        ← Anterior
+      </a>
+
+      <h2>{{ current.strftime('%B %Y') }}</h2>
+
+      <a
+        class="btn btn-sm btn-outline-secondary"
+        href="{{ url_for('main.calendar_view', year=next_month.year, month=next_month.month) }}"
+      >
+        Siguiente →
+      </a>
+    </div>
+
+    <!-- Cuadrícula del mes -->
+    <div class="calendar-grid">
+      <!-- Días de la semana -->
+      <div class="calendar-head">Lun</div>
+      <div class="calendar-head">Mar</div>
+      <div class="calendar-head">Mié</div>
+      <div class="calendar-head">Jue</div>
+      <div class="calendar-head">Vie</div>
+      <div class="calendar-head">Sáb</div>
+      <div class="calendar-head">Dom</div>
+
+      <!-- Celdas de semanas y días -->
+      {% for week in weeks %}
+        {% for number in week %}
+          {% set is_today = number and current.year == today.year and current.month == today.month and number == today.day %}
+
+          <div class="calendar-day {{ 'muted' if not number }} {{ 'today' if is_today }}">
+            {% if number %}
+              <span class="day-number">{{ number }}</span>
+              {% set day = current.replace(day=number) %}
+
+              {% for event in events.get(day, []) %}
+                <span
+                  class="calendar-event {{ event.kind }} {{ 'done' if event.done }}"
+                  title="{{ event.label }}"
+                >
+                  {{ event.label }}
+                </span>
+              {% endfor %}
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <!-- Leyenda de tipos de evento -->
+    <p class="calendar-legend">
+      <span class="calendar-event task">Tarea</span>
+      <span class="calendar-event habit">Hábito</span>
+      <span class="calendar-event goal">Objetivo</span>
+    </p>
+  </section>
+{% endblock %}

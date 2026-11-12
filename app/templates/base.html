@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}LifeTrack{% endblock %}</title>
+
+    <!-- Estilos externos y locales -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+
+    <!-- Scripts iniciales -->
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#content">Saltar al contenido</a>
+
+    <!-- Cabecera y barra de navegación -->
+    <header class="site-header">
+      <nav class="navbar navbar-expand-lg container" aria-label="Navegación principal">
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+          Life<span>Track</span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navigation"
+          aria-controls="navigation"
+          aria-expanded="false"
+          aria-label="Abrir navegación"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navigation">
+          <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('main.dashboard') }}">Resumen</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('tasks.index') }}">Tareas</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('habits.index') }}">Hábitos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('goals.index') }}">Objetivos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('main.calendar_view') }}">Calendario</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('analysis.index') }}">Análisis</a>
+            </li>
+
+            <!-- Selector de tema -->
+            <li class="nav-item">
+              <label class="visually-hidden" for="appearance">Apariencia</label>
+              <select
+                class="form-select form-select-sm appearance-select"
+                id="appearance"
+                data-theme-select
+              >
+                <option value="light">Claro</option>
+                <option value="dark">Oscuro</option>
+                <option value="black">Negro</option>
+              </select>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Contenido principal -->
+    <main id="content" class="container py-4 py-md-5">
+      <!-- Mensajes flash de Flask -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div
+            class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
+            role="alert"
+          >
+            {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+        {% endfor %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Scripts de Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
+

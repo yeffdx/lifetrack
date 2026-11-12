@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Tareas · LifeTrack{% endblock %}
+
+{% block content %}
+  <!-- Encabezado de página -->
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Planificación</p>
+      <h1>Tareas</h1>
+      <p class="text-muted mb-0">
+        Crea, prioriza y conserva el historial de finalización.
+      </p>
+    </div>
+  </section>
+
+  <!-- Formulario para crear nueva tarea -->
+  <section class="surface mb-4">
+    <h2 class="h5 mb-3">Nueva tarea</h2>
+
+    <form method="post" class="row g-3">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+      <div class="col-md-5">
+        <label class="form-label" for="title">Título</label>
+        <input
+          class="form-control"
+          id="title"
+          name="title"
+          maxlength="160"
+          required
+        >
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label" for="priority">Prioridad</label>
+        <select class="form-select" id="priority" name="priority">
+          <option value="medium">Media</option>
+          <option value="high">Alta</option>
+          <option value="low">Baja</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label" for="due_date">Vencimiento</label>
+        <input
+          class="form-control"
+          id="due_date"
+          type="date"
+          name="due_date"
+        >
+      </div>
+
+      <div class="col-12">
+        <label class="form-label" for="description">
+          Descripción <span class="text-muted">(opcional)</span>
+        </label>
+        <textarea
+          class="form-control"
+          id="description"
+          name="description"
+          rows="2"
+        ></textarea>
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-primary">Crear tarea</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Barra de búsqueda y filtros -->
+  <form class="filter-bar" method="get">
+    <label class="visually-hidden" for="q">Buscar</label>
+    <input
+      class="form-control"
+      id="q"
+      name="q"
+      placeholder="Buscar por título"
+      value="{{ search }}"
+    >
+
+    <select class="form-select" name="status" aria-label="Filtrar por estado">
+      <option value="">Todos los estados</option>
+      <option value="pending" {{ 'selected' if status == 'pending' }}>
+        Pendientes
+      </option>
+      <option value="completed" {{ 'selected' if status == 'completed' }}>
+        Completadas
+      </option>
+    </select>
+
+    <button class="btn btn-outline-secondary">Filtrar</button>
+  </form>
+
+  <!-- Tabla de tareas -->
+  <section class="surface p-0 overflow-hidden">
+    {% if tasks %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Tarea</th>
+              <th>Prioridad</th>
+              <th>Vencimiento</th>
+              <th>Estado</th>
+              <th><span class="visually-hidden">Acciones</span></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for task in tasks %}
+              <tr>
+                <!-- Título y descripción -->
+                <td>
+                  <strong>{{ task.title }}</strong>
+                  {% if task.description %}
+                    <small class="d-block text-muted">{{ task.description }}</small>
+                  {% endif %}
+                </td>
+
+                <!-- Prioridad -->
+                <td>
+                  <span class="priority {{ task.priority }}">
+                    {{ {'high': 'Alta', 'medium': 'Media', 'low': 'Baja'}[task.priority] }}
+                  </span>
+                </td>
+
+                <!-- Fecha de vencimiento -->
+                <td>
+                  {{ task.due_date or '—' }}
+                  {% if task.is_overdue %}
+                    <small class="d-block text-danger">Vencida</small>
+                  {% endif %}
+                </td>
+
+                <!-- Estado -->
+                <td>
+                  <span class="status {{ task.status }}">
+                    {{ 'Completada' if task.status == 'completed' else 'Pendiente' }}
+                  </span>
+                </td>
+
+                <!-- Acciones de fila -->
+                <td class="text-end action-row">
+                  <form method="post" action="{{ url_for('tasks.toggle', task_id=task.id) }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-success">
+                      {{ 'Reabrir' if task.status == 'completed' else 'Completar' }}
+                    </button>
+                  </form>
+
+                  <a
+                    class="btn btn-sm btn-outline-secondary"
+                    href="{{ url_for('tasks.edit', task_id=task.id) }}"
+                  >
+                    Editar
+                  </a>
+
+                  <form
+                    method="post"
+                    action="{{ url_for('tasks.delete', task_id=task.id) }}"
+                    data-confirm="¿Eliminar esta tarea y su historial?"
+                  >
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <!-- Estado vacío -->
+      <div class="empty-state">
+        <h2>No hay tareas que mostrar</h2>
+        <p>Prueba otro filtro o crea una tarea con el formulario.</p>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Hábitos · LifeTrack{% endblock %}
+
+{% block content %}
+  <!-- Encabezado de página -->
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Constancia</p>
+      <h1>Hábitos</h1>
+      <p class="text-muted mb-0">
+        Un día programado sin registro cuenta como incumplido al calcular las rachas.
+      </p>
+    </div>
+  </section>
+
+  <!-- Formulario para crear nuevo hábito -->
+  <section class="surface mb-4">
+    <h2 class="h5 mb-3">Nuevo hábito</h2>
+
+    <form method="post" class="row g-3">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+      <div class="col-md-5">
+        <label class="form-label" for="name">Nombre</label>
+        <input
+          class="form-control"
+          id="name"
+          name="name"
+          maxlength="120"
+          required
+        >
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label" for="frequency">Frecuencia</label>
+        <select class="form-select" id="frequency" name="frequency">
+          <option value="daily">Todos los días</option>
+          <option value="weekdays">Días seleccionados</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label" for="start_date">Inicio</label>
+        <input
+          class="form-control"
+          id="start_date"
+          type="date"
+          name="start_date"
+        >
+      </div>
+
+      <fieldset class="col-12 weekday-picker">
+        <legend class="form-label">
+          Días seleccionados
+          <span class="text-muted">(solo para esa frecuencia)</span>
+        </legend>
+
+        {% for value, label in [('0','L'), ('1','M'), ('2','MI'), ('3','J'), ('4','V'), ('5','S'), ('6','D')] %}
+          <label>
+            <input type="checkbox" name="weekdays" value="{{ value }}">
+            {{ label }}
+          </label>
+        {% endfor %}
+      </fieldset>
+
+      <div class="col-12">
+        <button class="btn btn-primary">Crear hábito</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Listado de hábitos registrados -->
+  {% if habits %}
+    <section class="habit-grid">
+      {% for habit in habits %}
+        {% set stat = stats[habit.id] %}
+
+        <article class="surface habit-card">
+          <!-- Cabecera de la tarjeta -->
+          <div class="section-heading">
+            <div>
+              <h2>{{ habit.name }}</h2>
+              <span class="status {{ 'completed' if habit.active else 'pending' }}">
+                {{ 'Activo' if habit.active else 'Pausado' }}
+              </span>
+            </div>
+
+            <a href="{{ url_for('habits.edit', habit_id=habit.id) }}">Configurar</a>
+          </div>
+
+          <!-- Métricas de cumplimiento y rachas -->
+          <div class="habit-metrics">
+            <div>
+              <strong>{{ stat.percent }}%</strong>
+              <span>cumplimiento</span>
+            </div>
+
+            <div>
+              <strong>{{ stat.current_streak }}</strong>
+              <span>racha actual</span>
+            </div>
+
+            <div>
+              <strong>{{ stat.max_streak }}</strong>
+              <span>mejor racha</span>
+            </div>
+          </div>
+
+          <p class="text-muted small mb-3">
+            {{ stat.completed }} de {{ stat.scheduled }} días programados cumplidos.
+          </p>
+
+          <!-- Botones de registro diario y eliminación -->
+          <div class="d-flex gap-2">
+            <form method="post" action="{{ url_for('habits.checkin', habit_id=habit.id) }}">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="date" value="{{ today }}">
+              <button
+                class="btn btn-sm btn-primary"
+                {{ 'disabled' if not habit.active or not habit.scheduled_on(today) }}
+              >
+                Registrar hoy
+              </button>
+            </form>
+
+            <form
+              method="post"
+              action="{{ url_for('habits.delete', habit_id=habit.id) }}"
+              data-confirm="¿Eliminar este hábito y sus registros?"
+            >
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </section>
+  {% else %}
+    <!-- Estado vacío -->
+    <section class="empty-state surface">
+      <h2>Aún no hay hábitos</h2>
+      <p>Define uno con una frecuencia realista para empezar a ver indicadores.</p>
+    </section>
+  {% endif %}
+{% endblock %}
